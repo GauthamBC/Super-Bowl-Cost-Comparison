@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Super Bowl Ticket Affordability | Category Panels</title>
+  <title>Super Bowl Ticket Burden Index | Category Panels</title>
   <style>
     :root{
       --action: #19C37D;
@@ -389,36 +389,43 @@
   <script>
     // -----------------------------
     // 1) DATA
+    //    ✅ Updated for Ticket Burden framing
+    //    ✅ Added Work Hours category
+    //    ✅ Removed Income category (since your final table no longer includes it)
     // -----------------------------
     const DATA = [
       {
-        key: "income",
-        tab: "Income",
-        title: "Super Bowl Ticket vs. Income: How Many Weeks It Takes by City",
-        subtitle: "How long it takes the typical household to “match” one Super Bowl ticket using monthly income.",
+        key: "workhours",
+        tab: "Work hours",
+        unit: "hours",
+        title: "Super Bowl Ticket Burden: Work Hours Needed by City",
+        subtitle: "How many typical work hours it would take to match the price of one Super Bowl ticket.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
+        // Worst 5 pulled from your Top 10 burdensome list (highest work hours within that group)
         worst: [
-          { city: "San Juan, Puerto Rico", value: 3.05 },
-          { city: "Cleveland, Ohio", value: 2.18 },
-          { city: "Detroit, Michigan", value: 2.15 },
-          { city: "Dayton, Ohio", value: 1.96 },
-          { city: "Hartford, Connecticut", value: 1.94 },
+          { city: "San Juan, Puerto Rico", value: 454 },
+          { city: "Jackson, Mississippi", value: 287 },
+          { city: "Tuscaloosa, Alabama", value: 256 },
+          { city: "Mobile, Alabama", value: 249 },
+          { city: "Macon, Georgia", value: 247 },
         ],
+        // Best 5 pulled from your bottom-10 list (lowest work hours)
         best: [
-          { city: "Sunnyvale, California", value: 0.47 },
-          { city: "Fremont, California", value: 0.48 },
-          { city: "Santa Clara, California", value: 0.49 },
-          { city: "Bellevue, Washington", value: 0.54 },
-          { city: "San Mateo, California", value: 0.54 },
+          { city: "Sunnyvale, California", value: 69 },
+          { city: "Fremont, California", value: 72 },
+          { city: "Santa Clara, California", value: 73 },
+          { city: "San Mateo, California", value: 81 },
+          { city: "San Francisco, California", value: 88 },
         ],
       },
 
       {
         key:"rent",
         tab:"Rent",
-        title:"Super Bowl Ticket vs. Rent: Months of Rent It Takes by City",
-        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly rent costs.",
+        unit:"months",
+        title:"Super Bowl Ticket Burden: Months of Rent It Takes by City",
+        subtitle:"How many months of rent it would take to match the price of one Super Bowl ticket.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
         worst: [
@@ -440,8 +447,9 @@
       {
         key:"transport",
         tab:"Transport",
-        title:"Super Bowl Ticket vs. Transportation: Months of Costs It Takes by City",
-        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly transportation costs.",
+        unit:"months",
+        title:"Super Bowl Ticket Burden: Months of Transport Costs It Takes by City",
+        subtitle:"How many months of transportation spending it would take to match the price of one Super Bowl ticket.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
         worst: [
@@ -463,8 +471,9 @@
       {
         key:"childcare",
         tab:"Childcare",
-        title:"Super Bowl Ticket vs. Childcare: Months of Care It Takes by City",
-        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly childcare costs.",
+        unit:"months",
+        title:"Super Bowl Ticket Burden: Months of Childcare It Takes by City",
+        subtitle:"How many months of childcare spending it would take to match the price of one Super Bowl ticket.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
         worst: [
@@ -486,8 +495,9 @@
       {
         key:"utilities",
         tab:"Utilities",
-        title:"Super Bowl Ticket vs. Utilities: Months of Bills It Takes by City",
-        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly utility bills.",
+        unit:"months",
+        title:"Super Bowl Ticket Burden: Months of Utility Bills It Takes by City",
+        subtitle:"How many months of utility bills it would take to match the price of one Super Bowl ticket.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
         worst: [
@@ -509,8 +519,9 @@
       {
         key:"grocery",
         tab:"Grocery",
-        title:"Super Bowl Ticket vs. Groceries: Months of Grocery Spending It Takes by City",
-        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly grocery spending.",
+        unit:"months",
+        title:"Super Bowl Ticket Burden: Months of Grocery Spending It Takes by City",
+        subtitle:"How many months of grocery spending it would take to match the price of one Super Bowl ticket.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
         worst: [
@@ -533,10 +544,20 @@
     // -----------------------------
     // 2) helpers
     // -----------------------------
-    const fmt1 = (n) => Number(n).toFixed(2).replace(/\.00$/, "");
     const safe = (s) => String(s).replace(/[&<>"']/g, m => ({
       "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
     }[m]));
+
+    const fmtMonths = (n) => Number(n).toFixed(2).replace(/\.00$/, "");
+    const fmtHours  = (n) => String(Math.round(Number(n))); // whole hours
+
+    function fmtValue(n, unit){
+      return unit === "hours" ? fmtHours(n) : fmtMonths(n);
+    }
+
+    function unitLabel(unit){
+      return unit === "hours" ? "hours" : "months";
+    }
 
     function computeRatio(worstVal, bestVal){
       const w = Number(worstVal);
@@ -577,16 +598,19 @@
         `;
       }
 
+      const u = cat.unit || "months";
+      const uLabel = unitLabel(u);
+
       const worstCity = worst[0];
       const bestCity  = best[0];
       const ratio = computeRatio(worstCity.value, bestCity.value);
-      const ratioText = ratio ? `${fmt1(ratio)}×` : "—";
+      const ratioText = ratio ? `${fmtMonths(ratio)}×` : "—";
 
       const worstRows = worst.map((d, i) => `
         <li class="row">
           <div class="rank">${i+1}</div>
           <div class="city">${safe(d.city)}</div>
-          <div class="value">${fmt1(d.value)}<span>months</span></div>
+          <div class="value">${fmtValue(d.value, u)}<span>${uLabel}</span></div>
         </li>
       `).join("");
 
@@ -594,12 +618,14 @@
         <li class="row">
           <div class="rank">${i+1}</div>
           <div class="city">${safe(d.city)}</div>
-          <div class="value">${fmt1(d.value)}<span>months</span></div>
+          <div class="value">${fmtValue(d.value, u)}<span>${uLabel}</span></div>
         </li>
       `).join("");
 
       const worstLabel = cat.worstLabel || "Most burdensome";
       const bestLabel  = cat.bestLabel  || "Least burdensome";
+
+      const comparatorWord = (u === "hours") ? "work hours" : "months";
 
       return `
         <section class="panel" data-key="${safe(cat.key)}" data-listmode="worst">
@@ -643,7 +669,7 @@
                   <p class="badgeLabel">Best vs. worst</p>
                   <p class="badgeValue">${ratioText}</p>
                   <p class="badgeFoot">
-                    <strong>${safe(worstCity.city)}</strong> takes about <strong>${ratioText}</strong> longer than <strong>${safe(bestCity.city)}</strong>.
+                    <strong>${safe(worstCity.city)}</strong> takes about <strong>${ratioText}</strong> as many ${safe(comparatorWord)} as <strong>${safe(bestCity.city)}</strong>.
                   </p>
                 </div>
               </div>
@@ -661,7 +687,7 @@
     // -----------------------------
     // 4) Category tabs + state
     // -----------------------------
-    const state = { activeKey: (DATA[0] && DATA[0].key) ? DATA[0].key : "income" };
+    const state = { activeKey: (DATA[0] && DATA[0].key) ? DATA[0].key : "workhours" };
 
     function buildTabs(){
       const tabsEl = document.getElementById("tabs");
