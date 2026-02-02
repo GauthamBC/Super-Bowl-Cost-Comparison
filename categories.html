@@ -42,7 +42,7 @@
       border: 1px solid var(--stroke);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      overflow: visible; /* ✅ IMPORTANT: let content overflow so outer scroller can scroll */
+      overflow: visible;
     }
 
     /* Only clip where you truly want clipping */
@@ -62,22 +62,12 @@
       border: 1px solid var(--stroke);
       border-radius: var(--radius);
       background: linear-gradient(180deg, rgba(255,255,255,1), rgba(25,195,125,0.03));
-    }
-
-    /* Sleek Action-green scrollbar (tabs) */
-    .tabs{
-      scrollbar-color: var(--action) rgba(10,20,30,0.06); /* Firefox */
-      scrollbar-width: thin; /* Firefox */
+      scrollbar-color: var(--action) rgba(10,20,30,0.06);
+      scrollbar-width: thin;
     }
     .tabs::-webkit-scrollbar{ height: 6px; }
-    .tabs::-webkit-scrollbar-thumb{
-      background: var(--action);
-      border-radius: 999px;
-    }
-    .tabs::-webkit-scrollbar-track{
-      background: rgba(10,20,30,0.06);
-      border-radius: 999px;
-    }
+    .tabs::-webkit-scrollbar-thumb{ background: var(--action); border-radius: 999px; }
+    .tabs::-webkit-scrollbar-track{ background: rgba(10,20,30,0.06); border-radius: 999px; }
 
     .tabBtn{
       appearance: none;
@@ -124,7 +114,7 @@
 
     /* Header */
     .header{
-      padding: 22px 22px 16px;
+      padding: 20px 18px 14px;
       background: linear-gradient(135deg, rgba(25,195,125,0.12), rgba(25,195,125,0.03));
       border-bottom: 1px solid var(--stroke);
       text-align: center;
@@ -143,80 +133,59 @@
       line-height: 1.45;
     }
 
-    /* ✅ OUTER horizontal scroller for the active panel */
+    /* ✅ No desktop horizontal scrolling */
     .panelScroll{
-      overflow-x: auto;
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
+      overflow-x: hidden;
+      overflow-y: visible;
       max-width: 100%;
-      padding-bottom: 6px; /* gives room for scrollbar */
-      scrollbar-color: var(--action) rgba(10,20,30,0.06); /* Firefox */
-      scrollbar-width: thin; /* Firefox */
+      padding-bottom: 0;
+    }
+    /* ✅ Allow horizontal scroll only on smaller screens (if needed) */
+    @media (max-width: 920px){
+      .panelScroll{
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 6px;
+        scrollbar-color: var(--action) rgba(10,20,30,0.06);
+        scrollbar-width: thin;
+      }
+      .panelScroll::-webkit-scrollbar{ height: 6px; }
+      .panelScroll::-webkit-scrollbar-thumb{ background: var(--action); border-radius: 999px; }
+      .panelScroll::-webkit-scrollbar-track{ background: rgba(10,20,30,0.06); border-radius: 999px; }
     }
 
-    /* Sleek Action-green scrollbar (active panel) */
-    .panelScroll::-webkit-scrollbar{ height: 6px; }
-    .panelScroll::-webkit-scrollbar-thumb{
-      background: var(--action);
-      border-radius: 999px;
-    }
-    .panelScroll::-webkit-scrollbar-track{
-      background: rgba(10,20,30,0.06);
-      border-radius: 999px;
-    }
-
-    /* ✅ This makes the scroll area actually have overflow width */
     #activePanel{
-      display: inline-block;  /* IMPORTANT: allows content width > container */
-      min-width: 980px;       /* matches the grid canvas */
+      display: block;
+      min-width: 0;
     }
 
-    /* ✅ Always 2 columns now: list + center badge */
+    /* ✅ Two columns: list + badge (no forced min-width) */
     .grid{
       display: grid;
-      grid-template-columns: 1.15fr 0.7fr;
-      gap: 20px;
-      padding: 18px;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 16px;
+      padding: 16px;
       align-items: stretch;
-      min-width: 980px;
+      min-width: 0;
     }
 
     .card{
       border: 1px solid var(--stroke);
       border-radius: var(--radius);
-      padding: 14px 14px 12px;
+      padding: 12px;
       background: linear-gradient(180deg, rgba(255,255,255,1), rgba(255,255,255,0.98));
       min-height: 100%;
-      min-width: 300px;
+      min-width: 0;
     }
     .card h3{
-      margin: 0 0 12px;
+      margin: 0 0 10px;
       display: flex;
       align-items: center;
       gap: 10px;
       font-size: 14px;
       flex-wrap: wrap;
-    }
-
-    .pill{
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(25,195,125,0.35);
-      background: rgba(25,195,125,0.10);
-      font-weight: 850;
-      color: #0A4A2F;
-      white-space: nowrap;
-    }
-    .dot{
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--action);
-      box-shadow: 0 0 0 3px rgba(25,195,125,0.15);
-      flex: 0 0 auto;
+      width: 100%;
     }
 
     .list{
@@ -229,18 +198,18 @@
 
     .row{
       display: grid;
-      grid-template-columns: 38px 1fr auto;
-      gap: 10px;
+      grid-template-columns: 34px 1fr auto;
+      gap: 8px;
       align-items: center;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border-radius: var(--radius);
       border: 1px solid rgba(10,20,30,0.10);
       background: rgba(10,20,30,0.02);
     }
 
     .rank{
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       display: grid;
       place-items: center;
       border-radius: 10px;
@@ -248,43 +217,43 @@
       border: 1px solid rgba(25,195,125,0.30);
       font-weight: 900;
       color: #0A4A2F;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .city{
       font-weight: 800;
       letter-spacing: -0.01em;
       line-height: 1.1;
-      font-size: 14px;
+      font-size: 13px;
     }
 
     .value{
       font-weight: 900;
       color: var(--ink);
-      font-size: 14px;
+      font-size: 13px;
       white-space: nowrap;
     }
     .value span{
       font-weight: 700;
       color: var(--muted);
       margin-left: 6px;
-      font-size: 12px;
+      font-size: 11px;
     }
 
     .centerCard{
       display: grid;
       place-items: center;
-      padding: 14px;
+      padding: 12px;
       border-radius: var(--radius);
       border: 1px dashed rgba(25,195,125,0.35);
       background: radial-gradient(500px 220px at 50% 30%, rgba(25,195,125,0.14), transparent 60%);
-      min-height: 240px;
+      min-height: 230px;
       overflow: hidden;
-      min-width: 260px;
+      min-width: 0;
     }
 
     .badge{
-      width: min(260px, 100%);
+      width: min(240px, 100%);
       aspect-ratio: 1 / 1;
       border-radius: var(--radius);
       background: rgba(255,255,255,0.92);
@@ -292,12 +261,12 @@
       box-shadow: 0 18px 40px rgba(10,20,30,0.10);
       display: grid;
       place-items: center;
-      padding: 14px;
+      padding: 12px;
     }
 
     .iconWrap{
-      width: clamp(60px, 6.5vw, 82px);
-      height: clamp(60px, 6.5vw, 82px);
+      width: clamp(56px, 6vw, 78px);
+      height: clamp(56px, 6vw, 78px);
       border-radius: 12px;
       display: grid;
       place-items: center;
@@ -315,7 +284,7 @@
     }
 
     .badgeValue{
-      font-size: clamp(24px, 3.2vw, 34px);
+      font-size: clamp(22px, 3vw, 32px);
       font-weight: 950;
       letter-spacing: -0.03em;
       color: var(--action-dark);
@@ -335,7 +304,7 @@
 
     .footer{
       border-top: 1px solid var(--stroke);
-      padding: 12px 18px 16px;
+      padding: 10px 16px 14px;
       text-align: center;
       background: linear-gradient(180deg, rgba(255,255,255,1), rgba(25,195,125,0.03));
     }
@@ -360,6 +329,7 @@
 
     /* -----------------------------
        ✅ Sub-tabs inside the list card
+       (ONLY tabs; no duplicate label pill)
     ------------------------------*/
     .subTabs{
       display: inline-flex;
@@ -368,7 +338,7 @@
       border: 1px solid rgba(10,20,30,0.10);
       background: rgba(10,20,30,0.02);
       border-radius: 999px;
-      margin-left: auto; /* helps push to the right on wide screens */
+      margin-left: auto;
     }
 
     .subTabBtn{
@@ -403,15 +373,15 @@
 
 <body>
   <div class="wrap">
-    <!-- ✅ tabs panel only gets clipping -->
+    <!-- ✅ category tabs panel only gets clipping -->
     <div class="panel panelClip">
       <div class="tabsWrap">
         <div id="tabs" class="tabs" role="tablist" aria-label="Category tabs"></div>
       </div>
     </div>
 
-    <!-- ✅ horizontal scroll wrapper for active content -->
-    <div class="panelScroll" aria-label="Scrollable panel">
+    <!-- ✅ active panel wrapper -->
+    <div class="panelScroll" aria-label="Panel">
       <div id="activePanel"></div>
     </div>
   </div>
@@ -586,7 +556,8 @@
 
     // -----------------------------
     // 3) render ONE category panel
-    //    ✅ Left card has internal tabs (Most/Least)
+    //    ✅ Left card only has switching tabs (no duplicate pill)
+    //    ✅ No forced min-width, so no desktop horizontal scroll
     // -----------------------------
     function renderPanel(cat){
       const worst = cat.worst?.length ? cat.worst : null;
@@ -611,7 +582,7 @@
       const ratio = computeRatio(worstCity.value, bestCity.value);
       const ratioText = ratio ? `${fmt1(ratio)}×` : "—";
 
-      const leftRows = worst.map((d, i) => `
+      const worstRows = worst.map((d, i) => `
         <li class="row">
           <div class="rank">${i+1}</div>
           <div class="city">${safe(d.city)}</div>
@@ -619,7 +590,7 @@
         </li>
       `).join("");
 
-      const rightRows = best.map((d, i) => `
+      const bestRows = best.map((d, i) => `
         <li class="row">
           <div class="rank">${i+1}</div>
           <div class="city">${safe(d.city)}</div>
@@ -638,14 +609,9 @@
           </header>
 
           <div class="grid">
-            <!-- ✅ ONE list card with internal tabs -->
+            <!-- ✅ ONE list card with ONLY switching tabs -->
             <article class="card">
-              <h3 style="justify-content: space-between; width: 100%;">
-                <span class="pill">
-                  <span class="dot"></span>
-                  <span class="listPillLabel">${safe(worstLabel)}</span>
-                </span>
-
+              <h3 style="justify-content: flex-end;">
                 <span class="subTabs" role="tablist" aria-label="Most vs least burdensome">
                   <button
                     class="subTabBtn"
@@ -653,8 +619,6 @@
                     role="tab"
                     aria-selected="true"
                     data-mode="worst"
-                    data-worstlabel="${safe(worstLabel)}"
-                    data-bestlabel="${safe(bestLabel)}"
                   >${safe(worstLabel)}</button>
 
                   <button
@@ -663,14 +627,12 @@
                     role="tab"
                     aria-selected="false"
                     data-mode="best"
-                    data-worstlabel="${safe(worstLabel)}"
-                    data-bestlabel="${safe(bestLabel)}"
                   >${safe(bestLabel)}</button>
                 </span>
               </h3>
 
-              <ol class="list" data-list="worst">${leftRows}</ol>
-              <ol class="list isHidden" data-list="best">${rightRows}</ol>
+              <ol class="list" data-list="worst">${worstRows}</ol>
+              <ol class="list isHidden" data-list="best">${bestRows}</ol>
             </article>
 
             <!-- Center badge stays -->
@@ -697,7 +659,7 @@
     }
 
     // -----------------------------
-    // 4) Tabs + state
+    // 4) Category tabs + state
     // -----------------------------
     const state = { activeKey: (DATA[0] && DATA[0].key) ? DATA[0].key : "income" };
 
@@ -739,8 +701,6 @@
     function renderActive(){
       const cat = DATA.find(c => c.key === state.activeKey) || DATA[0];
       document.getElementById("activePanel").innerHTML = renderPanel(cat);
-      // Always reset the internal list toggle to "Most burdensome" when switching categories
-      // (Optional; remove if you want it to remember the last choice.)
     }
 
     buildTabs();
@@ -785,12 +745,6 @@
       if (worstList && bestList){
         worstList.classList.toggle("isHidden", mode !== "worst");
         bestList.classList.toggle("isHidden", mode !== "best");
-      }
-
-      // Update pill label text (uses the button text so it stays per-category)
-      const pillLabel = panel.querySelector(".listPillLabel");
-      if (pillLabel){
-        pillLabel.textContent = btn.textContent.trim();
       }
     });
   </script>
