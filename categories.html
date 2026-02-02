@@ -171,10 +171,10 @@
       min-width: 980px;       /* matches the grid canvas */
     }
 
-    /* ✅ Always 3 columns; never collapse */
+    /* ✅ Always 2 columns now: list + center badge */
     .grid{
       display: grid;
-      grid-template-columns: 1.15fr 0.7fr 1.15fr;
+      grid-template-columns: 1.15fr 0.7fr;
       gap: 20px;
       padding: 18px;
       align-items: stretch;
@@ -217,11 +217,6 @@
       background: var(--action);
       box-shadow: 0 0 0 3px rgba(25,195,125,0.15);
       flex: 0 0 auto;
-    }
-    .hint{
-      color: var(--muted);
-      font-weight: 650;
-      white-space: nowrap;
     }
 
     .list{
@@ -362,6 +357,47 @@
       font-weight: 650;
       text-align: left;
     }
+
+    /* -----------------------------
+       ✅ Sub-tabs inside the list card
+    ------------------------------*/
+    .subTabs{
+      display: inline-flex;
+      gap: 8px;
+      padding: 4px;
+      border: 1px solid rgba(10,20,30,0.10);
+      background: rgba(10,20,30,0.02);
+      border-radius: 999px;
+      margin-left: auto; /* helps push to the right on wide screens */
+    }
+
+    .subTabBtn{
+      appearance: none;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-weight: 850;
+      font-size: 12px;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+      white-space: nowrap;
+    }
+
+    .subTabBtn:hover{
+      background: rgba(25,195,125,0.08);
+      color: var(--ink);
+    }
+
+    .subTabBtn[aria-selected="true"]{
+      background: rgba(25,195,125,0.14);
+      border-color: rgba(25,195,125,0.35);
+      color: #0A4A2F;
+    }
+
+    .isHidden{ display: none; }
   </style>
 </head>
 
@@ -392,8 +428,6 @@
         subtitle: "How long it takes the typical household to “match” one Super Bowl ticket using monthly income.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
-        worstHint: "(highest months)",
-        bestHint: "(lowest months)",
         worst: [
           { city: "San Juan, Puerto Rico", value: 3.05 },
           { city: "Cleveland, Ohio", value: 2.18 },
@@ -417,8 +451,6 @@
         subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly rent costs.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
-        worstHint: "(highest months)",
-        bestHint: "(lowest months)",
         worst: [
           { city: "Enterprise, Nevada", value: 12.31 },
           { city: "Sterling Heights, Michigan", value: 9.51 },
@@ -442,8 +474,6 @@
         subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly transportation costs.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
-        worstHint: "(highest months)",
-        bestHint: "(lowest months)",
         worst: [
           { city: "Jackson, Mississippi", value: 37.95 },
           { city: "Montgomery, Alabama", value: 37.31 },
@@ -467,8 +497,6 @@
         subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly childcare costs.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
-        worstHint: "(highest months)",
-        bestHint: "(lowest months)",
         worst: [
           { city: "Stockton, California", value: 27.09 },
           { city: "Evansville, Indiana", value: 24.63 },
@@ -492,8 +520,6 @@
         subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly utility bills.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
-        worstHint: "(highest months)",
-        bestHint: "(lowest months)",
         worst: [
           { city: "Elgin, Illinois", value: 67.73 },
           { city: "Aurora, Illinois", value: 59.76 },
@@ -517,8 +543,6 @@
         subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly grocery spending.",
         worstLabel: "Most burdensome",
         bestLabel: "Least burdensome",
-        worstHint: "(highest months)",
-        bestHint: "(lowest months)",
         worst: [
           { city: "San Juan, Puerto Rico", value: 16.93 },
           { city: "Des Moines, Iowa", value: 15.25 },
@@ -561,7 +585,8 @@
     }
 
     // -----------------------------
-    // 3) render ONE category panel (months only)
+    // 3) render ONE category panel
+    //    ✅ Left card has internal tabs (Most/Least)
     // -----------------------------
     function renderPanel(cat){
       const worst = cat.worst?.length ? cat.worst : null;
@@ -604,25 +629,51 @@
 
       const worstLabel = cat.worstLabel || "Most burdensome";
       const bestLabel  = cat.bestLabel  || "Least burdensome";
-      const worstHint  = cat.worstHint  || "(highest months)";
-      const bestHint   = cat.bestHint   || "(lowest months)";
 
       return `
-        <section class="panel" data-key="${safe(cat.key)}">
+        <section class="panel" data-key="${safe(cat.key)}" data-listmode="worst">
           <header class="header">
             <h2>${safe(cat.title)}</h2>
             <p>${safe(cat.subtitle || "")}</p>
           </header>
 
           <div class="grid">
+            <!-- ✅ ONE list card with internal tabs -->
             <article class="card">
-              <h3>
-                <span class="pill"><span class="dot"></span>${safe(worstLabel)}</span>
-                <span class="hint">${safe(worstHint)}</span>
+              <h3 style="justify-content: space-between; width: 100%;">
+                <span class="pill">
+                  <span class="dot"></span>
+                  <span class="listPillLabel">${safe(worstLabel)}</span>
+                </span>
+
+                <span class="subTabs" role="tablist" aria-label="Most vs least burdensome">
+                  <button
+                    class="subTabBtn"
+                    type="button"
+                    role="tab"
+                    aria-selected="true"
+                    data-mode="worst"
+                    data-worstlabel="${safe(worstLabel)}"
+                    data-bestlabel="${safe(bestLabel)}"
+                  >${safe(worstLabel)}</button>
+
+                  <button
+                    class="subTabBtn"
+                    type="button"
+                    role="tab"
+                    aria-selected="false"
+                    data-mode="best"
+                    data-worstlabel="${safe(worstLabel)}"
+                    data-bestlabel="${safe(bestLabel)}"
+                  >${safe(bestLabel)}</button>
+                </span>
               </h3>
-              <ol class="list">${leftRows}</ol>
+
+              <ol class="list" data-list="worst">${leftRows}</ol>
+              <ol class="list isHidden" data-list="best">${rightRows}</ol>
             </article>
 
+            <!-- Center badge stays -->
             <aside class="centerCard">
               <div class="badge">
                 <div>
@@ -635,14 +686,6 @@
                 </div>
               </div>
             </aside>
-
-            <article class="card">
-              <h3>
-                <span class="pill"><span class="dot"></span>${safe(bestLabel)}</span>
-                <span class="hint">${safe(bestHint)}</span>
-              </h3>
-              <ol class="list">${rightRows}</ol>
-            </article>
           </div>
 
           <footer class="footer">
@@ -696,12 +739,14 @@
     function renderActive(){
       const cat = DATA.find(c => c.key === state.activeKey) || DATA[0];
       document.getElementById("activePanel").innerHTML = renderPanel(cat);
+      // Always reset the internal list toggle to "Most burdensome" when switching categories
+      // (Optional; remove if you want it to remember the last choice.)
     }
 
     buildTabs();
     renderActive();
 
-    // Keyboard support (left/right)
+    // Keyboard support (left/right) for category tabs
     document.getElementById("tabs").addEventListener("keydown", (e) => {
       if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
       const keys = DATA.map(d => d.key);
@@ -716,6 +761,37 @@
 
       const btn = document.querySelector(`.tabBtn[data-key="${CSS.escape(next)}"]`);
       if (btn) btn.focus();
+    });
+
+    // ✅ Event delegation for the Most/Least toggle inside the active panel
+    document.getElementById("activePanel").addEventListener("click", (e) => {
+      const btn = e.target.closest(".subTabBtn");
+      if (!btn) return;
+
+      const panel = btn.closest("section.panel");
+      if (!panel) return;
+
+      const mode = btn.getAttribute("data-mode"); // "worst" | "best"
+      panel.setAttribute("data-listmode", mode);
+
+      // Update selected state on buttons
+      panel.querySelectorAll(".subTabBtn").forEach(b => {
+        b.setAttribute("aria-selected", b === btn ? "true" : "false");
+      });
+
+      // Toggle lists
+      const worstList = panel.querySelector('[data-list="worst"]');
+      const bestList  = panel.querySelector('[data-list="best"]');
+      if (worstList && bestList){
+        worstList.classList.toggle("isHidden", mode !== "worst");
+        bestList.classList.toggle("isHidden", mode !== "best");
+      }
+
+      // Update pill label text (uses the button text so it stays per-category)
+      const pillLabel = panel.querySelector(".listPillLabel");
+      if (pillLabel){
+        pillLabel.textContent = btn.textContent.trim();
+      }
     });
   </script>
 </body>
