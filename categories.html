@@ -1,0 +1,722 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Super Bowl Ticket Affordability | Category Panels</title>
+  <style>
+    :root{
+      --action: #19C37D;
+      --action-dark: #0EA765;
+      --ink: #0B1220;
+      --muted: #51606F;
+      --bg: #F4F7F8;
+      --card: #FFFFFF;
+      --stroke: rgba(10, 20, 30, 0.10);
+      --soft: rgba(25, 195, 125, 0.12);
+      --soft2: rgba(25, 195, 125, 0.06);
+      --shadow: 0 18px 50px rgba(10, 20, 30, 0.10);
+      --radius: 0px; /* ✅ square corners */
+    }
+
+    *{ box-sizing: border-box; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 420px at 50% -60px, var(--soft), transparent 70%),
+        radial-gradient(900px 420px at 10% 120%, var(--soft2), transparent 70%),
+        var(--bg);
+    }
+
+    .wrap{
+      width: min(1120px, calc(100% - 32px));
+      margin: 22px auto 40px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: visible; /* ✅ IMPORTANT: let content overflow so outer scroller can scroll */
+    }
+
+    /* Only clip where you truly want clipping */
+    .panelClip{ overflow: clip; }
+
+    /* Tabs container */
+    .tabsWrap{ padding: 14px; }
+
+    /* ✅ One row + horizontal scroll for tabs (mobile-friendly) */
+    .tabs{
+      display: flex;
+      gap: 10px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 10px;
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(25,195,125,0.03));
+    }
+
+    /* Sleek Action-green scrollbar (tabs) */
+    .tabs{
+      scrollbar-color: var(--action) rgba(10,20,30,0.06); /* Firefox */
+      scrollbar-width: thin; /* Firefox */
+    }
+    .tabs::-webkit-scrollbar{ height: 6px; }
+    .tabs::-webkit-scrollbar-thumb{
+      background: var(--action);
+      border-radius: 999px;
+    }
+    .tabs::-webkit-scrollbar-track{
+      background: rgba(10,20,30,0.06);
+      border-radius: 999px;
+    }
+
+    .tabBtn{
+      appearance: none;
+      border: 1px solid rgba(10,20,30,0.12);
+      background: rgba(10,20,30,0.02);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-weight: 850;
+      font-size: 13px;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform .06s ease, background .15s ease, border-color .15s ease;
+      user-select: none;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .tabBtn:active{ transform: translateY(1px); }
+    .tabBtn:hover{
+      border-color: rgba(25,195,125,0.35);
+      background: rgba(25,195,125,0.08);
+    }
+    .tabBtn[aria-selected="true"]{
+      border-color: rgba(25,195,125,0.45);
+      background: rgba(25,195,125,0.14);
+      color: #0A4A2F;
+      box-shadow: 0 10px 26px rgba(10,20,30,0.08);
+    }
+    .tabDot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(10,20,30,0.18);
+      box-shadow: 0 0 0 3px rgba(10,20,30,0.06);
+      flex: 0 0 auto;
+    }
+    .tabBtn[aria-selected="true"] .tabDot{
+      background: var(--action);
+      box-shadow: 0 0 0 3px rgba(25,195,125,0.15);
+    }
+
+    /* Header */
+    .header{
+      padding: 22px 22px 16px;
+      background: linear-gradient(135deg, rgba(25,195,125,0.12), rgba(25,195,125,0.03));
+      border-bottom: 1px solid var(--stroke);
+      text-align: center;
+    }
+    .header h2{
+      margin: 0 0 8px;
+      font-size: clamp(20px, 2.2vw, 30px);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      color: var(--action-dark);
+    }
+    .header p{
+      margin: 0;
+      color: var(--muted);
+      font-size: clamp(13px, 1.15vw, 15px);
+      line-height: 1.45;
+    }
+
+    /* ✅ OUTER horizontal scroller for the active panel */
+    .panelScroll{
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      max-width: 100%;
+      padding-bottom: 6px; /* gives room for scrollbar */
+      scrollbar-color: var(--action) rgba(10,20,30,0.06); /* Firefox */
+      scrollbar-width: thin; /* Firefox */
+    }
+
+    /* Sleek Action-green scrollbar (active panel) */
+    .panelScroll::-webkit-scrollbar{ height: 6px; }
+    .panelScroll::-webkit-scrollbar-thumb{
+      background: var(--action);
+      border-radius: 999px;
+    }
+    .panelScroll::-webkit-scrollbar-track{
+      background: rgba(10,20,30,0.06);
+      border-radius: 999px;
+    }
+
+    /* ✅ This makes the scroll area actually have overflow width */
+    #activePanel{
+      display: inline-block;  /* IMPORTANT: allows content width > container */
+      min-width: 980px;       /* matches the grid canvas */
+    }
+
+    /* ✅ Always 3 columns; never collapse */
+    .grid{
+      display: grid;
+      grid-template-columns: 1.15fr 0.7fr 1.15fr;
+      gap: 20px;
+      padding: 18px;
+      align-items: stretch;
+      min-width: 980px;
+    }
+
+    .card{
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      padding: 14px 14px 12px;
+      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(255,255,255,0.98));
+      min-height: 100%;
+      min-width: 300px;
+    }
+    .card h3{
+      margin: 0 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      flex-wrap: wrap;
+    }
+
+    .pill{
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(25,195,125,0.35);
+      background: rgba(25,195,125,0.10);
+      font-weight: 850;
+      color: #0A4A2F;
+      white-space: nowrap;
+    }
+    .dot{
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--action);
+      box-shadow: 0 0 0 3px rgba(25,195,125,0.15);
+      flex: 0 0 auto;
+    }
+    .hint{
+      color: var(--muted);
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .list{
+      display: grid;
+      gap: 10px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 38px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(10,20,30,0.10);
+      background: rgba(10,20,30,0.02);
+    }
+
+    .rank{
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      background: rgba(25,195,125,0.12);
+      border: 1px solid rgba(25,195,125,0.30);
+      font-weight: 900;
+      color: #0A4A2F;
+      font-size: 13px;
+    }
+
+    .city{
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+      font-size: 14px;
+    }
+
+    .value{
+      font-weight: 900;
+      color: var(--ink);
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    .value span{
+      font-weight: 700;
+      color: var(--muted);
+      margin-left: 6px;
+      font-size: 12px;
+    }
+
+    .centerCard{
+      display: grid;
+      place-items: center;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px dashed rgba(25,195,125,0.35);
+      background: radial-gradient(500px 220px at 50% 30%, rgba(25,195,125,0.14), transparent 60%);
+      min-height: 240px;
+      overflow: hidden;
+      min-width: 260px;
+    }
+
+    .badge{
+      width: min(260px, 100%);
+      aspect-ratio: 1 / 1;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,0.92);
+      border: 1px solid rgba(10,20,30,0.12);
+      box-shadow: 0 18px 40px rgba(10,20,30,0.10);
+      display: grid;
+      place-items: center;
+      padding: 14px;
+    }
+
+    .iconWrap{
+      width: clamp(60px, 6.5vw, 82px);
+      height: clamp(60px, 6.5vw, 82px);
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: rgba(25,195,125,0.12);
+      border: 1px solid rgba(25,195,125,0.28);
+      margin: 0 auto 10px;
+    }
+
+    .badgeLabel{
+      font-weight: 850;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin: 0 0 6px;
+    }
+
+    .badgeValue{
+      font-size: clamp(24px, 3.2vw, 34px);
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      color: var(--action-dark);
+      line-height: 1;
+      text-align: center;
+      margin: 0 0 10px;
+    }
+
+    .badgeFoot{
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 650;
+      line-height: 1.35;
+      text-align: center;
+      margin: 0;
+    }
+
+    .footer{
+      border-top: 1px solid var(--stroke);
+      padding: 12px 18px 16px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(255,255,255,1), rgba(25,195,125,0.03));
+    }
+    .footer .em{
+      color: var(--action-dark);
+      font-weight: 950;
+    }
+    .footer .pair{
+      display: block;
+      margin-top: 6px;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .emptyState{
+      padding: 18px;
+      color: var(--muted);
+      font-weight: 650;
+      text-align: left;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <!-- ✅ tabs panel only gets clipping -->
+    <div class="panel panelClip">
+      <div class="tabsWrap">
+        <div id="tabs" class="tabs" role="tablist" aria-label="Category tabs"></div>
+      </div>
+    </div>
+
+    <!-- ✅ horizontal scroll wrapper for active content -->
+    <div class="panelScroll" aria-label="Scrollable panel">
+      <div id="activePanel"></div>
+    </div>
+  </div>
+
+  <script>
+    // -----------------------------
+    // 1) DATA
+    // -----------------------------
+    const DATA = [
+      {
+        key: "income",
+        tab: "Income",
+        title: "Super Bowl Ticket vs. Income: How Many Weeks It Takes by City",
+        subtitle: "How long it takes the typical household to “match” one Super Bowl ticket using monthly income.",
+        worstLabel: "Most burdensome",
+        bestLabel: "Least burdensome",
+        worstHint: "(highest months)",
+        bestHint: "(lowest months)",
+        worst: [
+          { city: "San Juan, Puerto Rico", value: 3.05 },
+          { city: "Cleveland, Ohio", value: 2.18 },
+          { city: "Detroit, Michigan", value: 2.15 },
+          { city: "Dayton, Ohio", value: 1.96 },
+          { city: "Hartford, Connecticut", value: 1.94 },
+        ],
+        best: [
+          { city: "Sunnyvale, California", value: 0.47 },
+          { city: "Fremont, California", value: 0.48 },
+          { city: "Santa Clara, California", value: 0.49 },
+          { city: "Bellevue, Washington", value: 0.54 },
+          { city: "San Mateo, California", value: 0.54 },
+        ],
+      },
+
+      {
+        key:"rent",
+        tab:"Rent",
+        title:"Super Bowl Ticket vs. Rent: Months of Rent It Takes by City",
+        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly rent costs.",
+        worstLabel: "Most burdensome",
+        bestLabel: "Least burdensome",
+        worstHint: "(highest months)",
+        bestHint: "(lowest months)",
+        worst: [
+          { city: "Enterprise, Nevada", value: 12.31 },
+          { city: "Sterling Heights, Michigan", value: 9.51 },
+          { city: "Topeka, Kansas", value: 8.75 },
+          { city: "Beaumont, Texas", value: 8.74 },
+          { city: "McAllen, Texas", value: 8.34 }
+        ],
+        best: [
+          { city: "New York, New York", value: 1.50 },
+          { city: "Pasadena, California", value: 1.96 },
+          { city: "Boston, Massachusetts", value: 1.97 },
+          { city: "San Francisco, California", value: 1.98 },
+          { city: "Glendale, California", value: 2.02 }
+        ]
+      },
+
+      {
+        key:"transport",
+        tab:"Transport",
+        title:"Super Bowl Ticket vs. Transportation: Months of Costs It Takes by City",
+        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly transportation costs.",
+        worstLabel: "Most burdensome",
+        bestLabel: "Least burdensome",
+        worstHint: "(highest months)",
+        bestHint: "(lowest months)",
+        worst: [
+          { city: "Jackson, Mississippi", value: 37.95 },
+          { city: "Montgomery, Alabama", value: 37.31 },
+          { city: "Mobile, Alabama", value: 37.31 },
+          { city: "Tuscaloosa, Alabama", value: 37.31 },
+          { city: "Huntsville, Alabama", value: 37.31 }
+        ],
+        best: [
+          { city: "Fargo, North Dakota", value: 16.07 },
+          { city: "Rochester, New York", value: 21.90 },
+          { city: "Buffalo, New York", value: 21.90 },
+          { city: "Syracuse, New York", value: 21.90 },
+          { city: "Yonkers, New York", value: 21.90 }
+        ]
+      },
+
+      {
+        key:"childcare",
+        tab:"Childcare",
+        title:"Super Bowl Ticket vs. Childcare: Months of Care It Takes by City",
+        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly childcare costs.",
+        worstLabel: "Most burdensome",
+        bestLabel: "Least burdensome",
+        worstHint: "(highest months)",
+        bestHint: "(lowest months)",
+        worst: [
+          { city: "Stockton, California", value: 27.09 },
+          { city: "Evansville, Indiana", value: 24.63 },
+          { city: "Davenport, Iowa", value: 20.99 },
+          { city: "Laredo, Texas", value: 19.35 },
+          { city: "Mobile, Alabama", value: 16.93 }
+        ],
+        best: [
+          { city: "Pasadena, California", value: 1.74 },
+          { city: "New Bedford, Massachusetts", value: 1.98 },
+          { city: "New York, New York", value: 2.00 },
+          { city: "Vacaville, California", value: 2.18 },
+          { city: "San Francisco, California", value: 2.18 }
+        ]
+      },
+
+      {
+        key:"utilities",
+        tab:"Utilities",
+        title:"Super Bowl Ticket vs. Utilities: Months of Bills It Takes by City",
+        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly utility bills.",
+        worstLabel: "Most burdensome",
+        bestLabel: "Least burdensome",
+        worstHint: "(highest months)",
+        bestHint: "(lowest months)",
+        worst: [
+          { city: "Elgin, Illinois", value: 67.73 },
+          { city: "Aurora, Illinois", value: 59.76 },
+          { city: "Aurora, Colorado", value: 59.76 },
+          { city: "Macon, Georgia", value: 56.44 },
+          { city: "Midland, Texas", value: 55.95 }
+        ],
+        best: [
+          { city: "Odessa, Texas", value: 15.05 },
+          { city: "Warren, Michigan", value: 16.93 },
+          { city: "San Juan, Puerto Rico", value: 18.91 },
+          { city: "Bakersfield, California", value: 18.99 },
+          { city: "Brownsville, Texas", value: 19.92 }
+        ]
+      },
+
+      {
+        key:"grocery",
+        tab:"Grocery",
+        title:"Super Bowl Ticket vs. Groceries: Months of Grocery Spending It Takes by City",
+        subtitle:"How long it takes the typical household to “match” one Super Bowl ticket using monthly grocery spending.",
+        worstLabel: "Most burdensome",
+        bestLabel: "Least burdensome",
+        worstHint: "(highest months)",
+        bestHint: "(lowest months)",
+        worst: [
+          { city: "San Juan, Puerto Rico", value: 16.93 },
+          { city: "Des Moines, Iowa", value: 15.25 },
+          { city: "Davenport, Iowa", value: 15.25 },
+          { city: "Cedar Rapids, Iowa", value: 15.25 },
+          { city: "Norman, Oklahoma", value: 15.25 }
+        ],
+        best: [
+          { city: "Honolulu, Hawaii", value: 10.79 },
+          { city: "Anchorage, Alaska", value: 11.14 },
+          { city: "Vallejo, California", value: 13.33 },
+          { city: "Norwalk, California", value: 13.33 },
+          { city: "Victorville, California", value: 13.33 }
+        ]
+      },
+    ];
+
+    // -----------------------------
+    // 2) helpers
+    // -----------------------------
+    const fmt1 = (n) => Number(n).toFixed(2).replace(/\.00$/, "");
+    const safe = (s) => String(s).replace(/[&<>"']/g, m => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[m]));
+
+    function computeRatio(worstVal, bestVal){
+      const w = Number(worstVal);
+      const b = Number(bestVal);
+      if (!isFinite(w) || !isFinite(b) || b <= 0) return null;
+      return w / b;
+    }
+
+    function iconSvg(){
+      return `
+        <svg width="54" height="54" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M10 22C10 15.3726 15.3726 10 22 10H42C48.6274 10 54 15.3726 54 22V42C54 48.6274 48.6274 54 42 54H22C15.3726 54 10 48.6274 10 42V22Z" fill="rgba(25,195,125,0.18)" stroke="rgba(25,195,125,0.35)"/>
+          <path d="M32 18V46" stroke="#0EA765" stroke-width="4" stroke-linecap="round"/>
+          <path d="M39.5 23.5C39.5 21.0147 36.6421 19 32 19C27.3579 19 24.5 21.0147 24.5 23.5C24.5 25.9853 27.3579 28 32 28C36.6421 28 39.5 30.0147 39.5 32.5C39.5 34.9853 36.6421 37 32 37C27.3579 37 24.5 34.9853 24.5 32.5" stroke="#0EA765" stroke-width="4" stroke-linecap="round"/>
+        </svg>`;
+    }
+
+    // -----------------------------
+    // 3) render ONE category panel (months only)
+    // -----------------------------
+    function renderPanel(cat){
+      const worst = cat.worst?.length ? cat.worst : null;
+      const best  = cat.best?.length  ? cat.best  : null;
+
+      if (!worst || !best){
+        return `
+          <section class="panel" data-key="${safe(cat.key)}">
+            <header class="header">
+              <h2>${safe(cat.title)}</h2>
+              <p>${safe(cat.subtitle || "")}</p>
+            </header>
+            <div class="emptyState">
+              Data not added yet. Paste your top 5 and bottom 5 cities for this category.
+            </div>
+          </section>
+        `;
+      }
+
+      const worstCity = worst[0];
+      const bestCity  = best[0];
+      const ratio = computeRatio(worstCity.value, bestCity.value);
+      const ratioText = ratio ? `${fmt1(ratio)}×` : "—";
+
+      const leftRows = worst.map((d, i) => `
+        <li class="row">
+          <div class="rank">${i+1}</div>
+          <div class="city">${safe(d.city)}</div>
+          <div class="value">${fmt1(d.value)}<span>months</span></div>
+        </li>
+      `).join("");
+
+      const rightRows = best.map((d, i) => `
+        <li class="row">
+          <div class="rank">${i+1}</div>
+          <div class="city">${safe(d.city)}</div>
+          <div class="value">${fmt1(d.value)}<span>months</span></div>
+        </li>
+      `).join("");
+
+      const worstLabel = cat.worstLabel || "Most burdensome";
+      const bestLabel  = cat.bestLabel  || "Least burdensome";
+      const worstHint  = cat.worstHint  || "(highest months)";
+      const bestHint   = cat.bestHint   || "(lowest months)";
+
+      return `
+        <section class="panel" data-key="${safe(cat.key)}">
+          <header class="header">
+            <h2>${safe(cat.title)}</h2>
+            <p>${safe(cat.subtitle || "")}</p>
+          </header>
+
+          <div class="grid">
+            <article class="card">
+              <h3>
+                <span class="pill"><span class="dot"></span>${safe(worstLabel)}</span>
+                <span class="hint">${safe(worstHint)}</span>
+              </h3>
+              <ol class="list">${leftRows}</ol>
+            </article>
+
+            <aside class="centerCard">
+              <div class="badge">
+                <div>
+                  <div class="iconWrap">${iconSvg()}</div>
+                  <p class="badgeLabel">Best vs. worst</p>
+                  <p class="badgeValue">${ratioText}</p>
+                  <p class="badgeFoot">
+                    <strong>${safe(worstCity.city)}</strong> takes about <strong>${ratioText}</strong> longer than <strong>${safe(bestCity.city)}</strong>.
+                  </p>
+                </div>
+              </div>
+            </aside>
+
+            <article class="card">
+              <h3>
+                <span class="pill"><span class="dot"></span>${safe(bestLabel)}</span>
+                <span class="hint">${safe(bestHint)}</span>
+              </h3>
+              <ol class="list">${rightRows}</ol>
+            </article>
+          </div>
+
+          <footer class="footer">
+            <span class="em">${ratioText} difference</span>
+            <span class="pair">${safe(bestCity.city)} vs. ${safe(worstCity.city)}</span>
+          </footer>
+        </section>
+      `;
+    }
+
+    // -----------------------------
+    // 4) Tabs + state
+    // -----------------------------
+    const state = { activeKey: (DATA[0] && DATA[0].key) ? DATA[0].key : "income" };
+
+    function buildTabs(){
+      const tabsEl = document.getElementById("tabs");
+      tabsEl.innerHTML = DATA.map((c) => {
+        const selected = c.key === state.activeKey;
+        return `
+          <button
+            class="tabBtn"
+            type="button"
+            role="tab"
+            aria-selected="${selected ? "true" : "false"}"
+            aria-controls="activePanel"
+            data-key="${safe(c.key)}"
+          >
+            <span class="tabDot" aria-hidden="true"></span>
+            ${safe(c.tab || c.key)}
+          </button>
+        `;
+      }).join("");
+
+      tabsEl.querySelectorAll(".tabBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.activeKey = btn.getAttribute("data-key");
+          renderActive();
+          syncTabsSelection();
+        });
+      });
+    }
+
+    function syncTabsSelection(){
+      document.querySelectorAll(".tabBtn").forEach(btn => {
+        const k = btn.getAttribute("data-key");
+        btn.setAttribute("aria-selected", k === state.activeKey ? "true" : "false");
+      });
+    }
+
+    function renderActive(){
+      const cat = DATA.find(c => c.key === state.activeKey) || DATA[0];
+      document.getElementById("activePanel").innerHTML = renderPanel(cat);
+    }
+
+    buildTabs();
+    renderActive();
+
+    // Keyboard support (left/right)
+    document.getElementById("tabs").addEventListener("keydown", (e) => {
+      if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+      const keys = DATA.map(d => d.key);
+      const i = Math.max(0, keys.indexOf(state.activeKey));
+      const next = e.key === "ArrowRight"
+        ? keys[(i + 1) % keys.length]
+        : keys[(i - 1 + keys.length) % keys.length];
+
+      state.activeKey = next;
+      renderActive();
+      syncTabsSelection();
+
+      const btn = document.querySelector(`.tabBtn[data-key="${CSS.escape(next)}"]`);
+      if (btn) btn.focus();
+    });
+  </script>
+</body>
+</html>
